@@ -33,8 +33,13 @@ reflectimg.src = 'reflect.png';
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
-const name = urlParams.get('name').toUpperCase()
 
+if(queryString.includes("name=")==true){
+	var name = urlParams.get('name').toUpperCase();
+}else{
+	var name = "";
+}
+	
 var t=0;
 
 //************ read bitmap font
