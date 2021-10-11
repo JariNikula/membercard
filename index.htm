@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style>
+.center {
+  text-align: center;
+  margin: auto;
+  margin-top: 100px;
+  width: 50%;
+  border: 0px solid green;
+  padding: 10px;
+}
+
+.canvas {
+	border:0px;
+}
+</style>
+</head>
+
+<body>
+<div class="center">
+<canvas id="myCanvas" width="709" height="437">
+Your browser does not support the HTML canvas tag.</canvas>
+</div>
+<script>
+
+var cardimg = new Image();
+cardimg.src = 'TezMemCard.png';
+
+var reflectimg = new Image();
+reflectimg.src = 'reflect.png';
+
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+const name = urlParams.get('name').toUpperCase()
+
+var t=0;
+
+//************ read bitmap font
+
+var fontimg = new Image();
+fontimg.src = 'marmorfont32x29_w.png';                 //bitmap fontfile width=36 px and height=40 px
+
+var charWidth=32;
+var charHeight=29;
+
+//array with chars that have diffrent values then standard
+var charData=[
+	{letter: "I", width: 16}
+
+    ];
+
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+
+window.requestAnimationFrame(draw);           //go to draw
+
+function draw() {
+	ctx.clearRect(0,0,709,437);           //clear the screen
+
+	
+
+	c.style.transform = "perspective(50px) rotateX("+Math.sin(t)+"deg) rotateY("+Math.sin(t/3)+"deg) rotateZ("+10*Math.sin(t/2)+"deg)";
+	ctx.drawImage(cardimg,0,0);	    
+    	writeText(name,30,200);             //call text function.  Text , X pos , Y pos
+
+
+	ctx.globalCompositeOperation = 'source-atop';	//source-atop
+	ctx.drawImage(reflectimg,25*Math.sin(t/3)-30,25*Math.sin(t)-30)
+
+	ctx.globalCompositeOperation = 'source-over';	//back to org
+
+	t+=0.01;
+ window.requestAnimationFrame(draw);          //back to draw again
+}
+
+function writeText(text,X,Y){
+    var width=0;
+    var spacing=0;
+    var textpos=0;
+    var lowercase=false;
+    var skip=false;
+
+    for(i=0;i<text.length;i++){
+        var index = charData.findIndex(charData => charData.letter === text.charAt(i));  //checks if char excists in array and gets its index else -1
+
+        if(index>-1){
+
+            if (text.charAt(i+1) == text.charAt(i+1).toLowerCase()) {
+                lowercase=true;
+            }else{
+                lowercase=false;
+            }
+
+            //make the changes from array
+            width=charData[index].width;       //how wide letter
+        
+            if("limit" in charData[index]==true && lowercase==false){          //limit to lowercase only
+                skip=true;
+            }else{
+                skip=false;
+            }
+            
+            if("spacing" in charData[index]==true && skip==false){             //set new value if spacing excists in array
+                spacing=charData[index].spacing;
+            }else{
+                spacing=0;
+            }    
+            
+            if("pos" in charData[index]==true && skip==false){                 //set new value if pos excists in array
+                textpos+=charData[index].pos;
+            }            
+
+        }else{
+            //else normal setting
+            width=charWidth;
+            spacing=0;
+        }
+
+        textpos+=width;     //adds next letter position to right
+
+        var letter=text.charCodeAt(i)-32;   //get charcode for the letter        
+        
+        //x startclipping,y startclipping, width of clip, height of clip, x place, y place, width to use, height to use)
+        ctx.drawImage(fontimg,letter%10*charWidth,~~(letter/10)*charHeight,width,charHeight,X+spacing+textpos-width,(Y),width,charHeight);      //draw letter from the image
+    }    
+}
+
+</script>
+
+</body>
+</html>
