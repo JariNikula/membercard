@@ -24,6 +24,8 @@
 Your browser does not support the HTML canvas tag.</canvas>
 </div>
 <script>
+	
+var hussk=false;
 
 var cardimg = new Image();
 cardimg.src = 'TezMemCard.png';
@@ -39,6 +41,12 @@ if(queryString.includes("name=")==true){
 }else{
 	var name = "";
 }
+
+if(queryString.includes("hussk=yes")==true){
+	var cardimg = new Image();
+	cardimg.src = 'HusskMemCard.png';
+	hussk=true;
+}	
 	
 var t=0;
 
