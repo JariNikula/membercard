@@ -9,25 +9,31 @@
   margin-top: 100px;
   width: 50%;
   border: 0px solid green;
-  padding: 10px;
+  padding: 0px;
 }
 </style>
 </head>
 
 <body>
 <div id="center">
+<canvas id="fontCanvas" width="320" height="200"></canvas>
 <canvas id="myCanvas" width="709" height="437">
 Your browser does not support the HTML canvas tag.</canvas>
 </div>
+
 <script>
-	
-var hussk=false;
+
+var fontColor="#0000";
+var yText=200;
 
 var cardimg = new Image();
 cardimg.src = 'TezMemCard.png';
 
 var reflectimg = new Image();
 reflectimg.src = 'reflect.png';
+
+var fontimg = new Image();
+fontimg.src = 'marmorfont32x29_w.png';                 //bitmap fontfile width=32 px and height=29 px
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
@@ -42,14 +48,16 @@ if(queryString.includes("hussk=yes")==true){
 	var cardimg = new Image();
 	cardimg.src = 'HusskMemCard.png';
 	hussk=true;
-}	
-	
-var t=0;
+}
 
-//************ read bitmap font
+if(queryString.includes("card=TOS")==true){
+	var cardimg = new Image();
+	cardimg.src = 'TOS.png';
+	fontColor="#5df8"; //5ff5
+	yText=260;
+}
 
-var fontimg = new Image();
-fontimg.src = 'marmorfont32x29_w.png';                 //bitmap fontfile width=36 px and height=40 px
+var t=0;	//timer
 
 var charWidth=32;
 var charHeight=29;
@@ -63,22 +71,33 @@ var charData=[
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
 
+var c2 = document.getElementById("fontCanvas");
+var ctx2 = c2.getContext("2d");
+ctx2.canvas.hidden = true;
+
 window.requestAnimationFrame(draw);           //go to draw
 
 function draw() {
-	ctx.clearRect(0,0,709,437);           //clear the screen
+	if(t<1){
+	ctx2.clearRect(0,0,320,200);
+	ctx2.drawImage(fontimg,0,0);
+	ctx2.globalCompositeOperation = 'source-atop';
+	ctx2.fillStyle=fontColor;
+	ctx2.fillRect(0,0,320,200);
+	ctx2.globalCompositeOperation = 'source-over';
+	}
 
-	
+	ctx.clearRect(0,0,709,437);
 
 	c.style.transform = "perspective(50px) rotateX("+Math.sin(t)+"deg) rotateY("+Math.sin(t/3)+"deg) rotateZ("+10*Math.sin(t/2)+"deg)";
 	ctx.drawImage(cardimg,0,0);	    
-    	writeText(name,30,200);             //call text function.  Text , X pos , Y pos
 
+    	writeText(name,30,yText);
 
-	ctx.globalCompositeOperation = 'source-atop';	//source-atop
+	ctx.globalCompositeOperation = 'source-atop';
 	ctx.drawImage(reflectimg,25*Math.sin(t/3)-30,25*Math.sin(t)-30)
 
-	ctx.globalCompositeOperation = 'source-over';	//back to org
+	ctx.globalCompositeOperation = 'source-over';
 
 	t+=0.01;
  window.requestAnimationFrame(draw);          //back to draw again
@@ -130,9 +149,9 @@ function writeText(text,X,Y){
         textpos+=width;     //adds next letter position to right
 
         var letter=text.charCodeAt(i)-32;   //get charcode for the letter        
-        
-        //x startclipping,y startclipping, width of clip, height of clip, x place, y place, width to use, height to use)
-        ctx.drawImage(fontimg,letter%10*charWidth,~~(letter/10)*charHeight,width,charHeight,X+spacing+textpos-width,(Y),width,charHeight);      //draw letter from the image
+
+        //x startclipping,y startclipping, width of clip, height of clip, x place, y place, width to use, height to use) 
+       ctx.drawImage(c2,letter%10*charWidth,~~(letter/10)*charHeight,width,charHeight,X+spacing+textpos-width,(Y),width,charHeight);      //draw letter from the image
     }    
 }
 
